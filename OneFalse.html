@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#ffffff">
+<title>One False</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --card:#f5f5f7;
+    --card-2:#eeeef1;
+    --line:#e3e3e8;
+    --line-strong:#d2d2d8;
+    --ink:#1a1a1a;
+    --ink-soft:#3c3c43;
+    --ink-mute:#86868b;
+    --gold:#f5b301;
+    --gold-deep:#d99700;
+    --good:#3aa55d;
+    --good-deep:#2e8b4e;
+    --good-tint:#e8f6ee;
+    --bad:#d83a3a;
+    --bad-deep:#b92d2d;
+    --bad-tint:#fbecec;
+    --lock:#b8b8bf;
+    --radius:16px;
+    --radius-lg:22px;
+    --shadow:0 1px 2px rgba(0,0,0,.05), 0 6px 20px -12px rgba(0,0,0,.18);
+    --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--font);
+    color:var(--ink);
+    background:var(--bg);
+    min-height:100vh;
+    min-height:100dvh;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .wrap{
+    max-width:560px;
+    margin:0 auto;
+    padding:20px 16px 48px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    padding-bottom:14px;
+    border-bottom:1px solid var(--line);
+  }
+  .topline{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .brand{
+    display:flex;
+    align-items:baseline;
+    gap:9px;
+    font-weight:800;
+    letter-spacing:-.2px;
+  }
+  .brand .glyph{
+    font-size:1.1rem;
+    line-height:1;
+    transform:translateY(1px);
+  }
+  .brand .name{font-size:1.4rem;}
+  .brand .num{
+    font-size:1.4rem;
+    color:var(--ink-mute);
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+  }
+  .streak{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:var(--card);
+    border:1px solid var(--line);
+    padding:7px 12px;
+    border-radius:999px;
+    font-size:.82rem;
+    font-weight:700;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .streak[hidden]{display:none;}
+  .tagline{
+    margin:0;
+    color:var(--ink-mute);
+    font-size:.98rem;
+    font-weight:500;
+  }
+  .tagline b{color:var(--ink);font-weight:700;}
+
+  /* ---------- Progress ---------- */
+  .progress{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .progress-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .progress .label{
+    font-size:.72rem;
+    text-transform:uppercase;
+    letter-spacing:1.2px;
+    color:var(--ink-mute);
+    font-weight:700;
+  }
+  .stars{
+    display:flex;
+    gap:6px;
+    font-size:1.5rem;
+    line-height:1;
+  }
+  .stars span{
+    display:inline-block;
+    transition:transform .2s ease;
+    color:var(--gold);
+  }
+  .stars span.pending{color:var(--lock);font-size:1.2rem;align-self:center;}
+  .stars span.pop{
+    animation:star-pop .55s cubic-bezier(.18,.9,.32,1.4);
+  }
+  @keyframes star-pop{
+    0%{transform:scale(.2) rotate(-30deg);}
+    55%{transform:scale(1.4) rotate(8deg);}
+    100%{transform:scale(1) rotate(0);}
+  }
+  .perfect{
+    font-size:.86rem;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    gap:7px;
+    padding-top:2px;
+  }
+  .perfect[hidden]{display:none;}
+  .perfect.win{color:var(--good-deep);}
+  .perfect.lost{color:var(--ink-mute);}
+
+  /* ---------- Level tabs ---------- */
+  .levels{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+  }
+  .level-tab{
+    appearance:none;
+    border:1px solid var(--line-strong);
+    background:#fff;
+    color:var(--ink-soft);
+    border-radius:13px;
+    padding:11px 8px;
+    font-family:inherit;
+    font-size:.92rem;
+    font-weight:700;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    transition:transform .12s ease, border-color .2s ease, background .2s ease, color .2s ease;
+  }
+  .level-tab .lvl-name{letter-spacing:-.1px;}
+  .level-tab .lvl-state{font-size:.95rem;line-height:1;min-height:1em;}
+  .level-tab[aria-selected="true"]{
+    border-color:var(--ink);
+    background:var(--ink);
+    color:#fff;
+  }
+  .level-tab.done:not([aria-selected="true"]){
+    border-color:var(--good);
+    background:var(--good-tint);
+    color:var(--good-deep);
+  }
+  .level-tab.locked{
+    color:var(--lock);
+    background:var(--card-2);
+    border-color:var(--line);
+    cursor:not-allowed;
+  }
+  .level-tab:not(.locked):active{transform:translateY(1px) scale(.98);}
+  .level-tab:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+
+  /* ---------- Question card ---------- */
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow);
+    padding:20px 18px 22px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    animation:card-in .35s ease both;
+  }
+  @keyframes card-in{
+    from{opacity:0;transform:translateY(8px);}
+    to{opacity:1;transform:none;}
+  }
+  .card-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .category{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    background:#fff;
+    border:1px solid var(--line-strong);
+    color:var(--ink-soft);
+    padding:5px 12px;
+    border-radius:999px;
+    font-size:.74rem;
+    font-weight:800;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+  }
+  .difficulty{
+    font-size:.72rem;
+    font-weight:700;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--ink-mute);
+  }
+  .prompt{
+    margin:0;
+    font-size:1.08rem;
+    font-weight:700;
+    color:var(--ink);
+    line-height:1.35;
+    letter-spacing:-.2px;
+  }
+  .prompt small{
+    display:block;
+    margin-top:4px;
+    color:var(--ink-mute);
+    font-weight:500;
+    font-size:.85rem;
+  }
+
+  .statements{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .statement{
+    appearance:none;
+    text-align:left;
+    width:100%;
+    border:1.5px solid var(--line-strong);
+    background:#fff;
+    color:var(--ink);
+    border-radius:14px;
+    padding:16px 16px 16px 52px;
+    font-family:inherit;
+    font-size:1rem;
+    line-height:1.35;
+    font-weight:500;
+    cursor:pointer;
+    position:relative;
+    min-height:58px;
+    transition:transform .12s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+  }
+  .statement .marker{
+    position:absolute;
+    left:14px;
+    top:50%;
+    transform:translateY(-50%);
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    border:2px solid var(--line-strong);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:.9rem;
+    font-weight:800;
+    color:var(--ink-mute);
+    background:#fff;
+    transition:all .2s ease;
+  }
+  .statement:not(:disabled):hover{border-color:var(--ink);}
+  .statement:not(:disabled):active{transform:translateY(1px) scale(.995);}
+  .statement:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+  .statement:disabled{cursor:default;}
+
+  .statement.correct{
+    border-color:var(--good);
+    background:var(--good-tint);
+    box-shadow:0 0 0 1px var(--good) inset;
+  }
+  .statement.correct .marker{
+    border-color:var(--good);
+    background:var(--good);
+    color:#fff;
+  }
+  .statement.wrong{
+    border-color:var(--bad);
+    background:var(--bad-tint);
+    box-shadow:0 0 0 1px var(--bad) inset;
+    animation:shake .4s ease;
+  }
+  .statement.wrong .marker{
+    border-color:var(--bad);
+    background:var(--bad);
+    color:#fff;
+  }
+  .statement.reveal{
+    border-color:var(--good);
+    background:var(--good-tint);
+  }
+  .statement.reveal .marker{
+    border-color:var(--good);
+    color:var(--good-deep);
+    background:#fff;
+  }
+  .statement.dim{opacity:.5;}
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-6px);}
+    40%{transform:translateX(6px);}
+    60%{transform:translateX(-4px);}
+    80%{transform:translateX(4px);}
+  }
+
+  /* ---------- Hint ---------- */
+  .hint-wrap{display:flex;flex-direction:column;gap:10px;}
+  .hint-btn{
+    appearance:none;
+    align-self:flex-start;
+    border:1px solid var(--line-strong);
+    background:#fff;
+    color:var(--ink-soft);
+    border-radius:999px;
+    padding:9px 16px;
+    font-family:inherit;
+    font-size:.86rem;
+    font-weight:700;
+    cursor:pointer;
+    transition:border-color .2s ease,color .2s ease,transform .12s ease;
+  }
+  .hint-btn:hover{border-color:var(--gold-deep);color:var(--gold-deep);}
+  .hint-btn:active{transform:translateY(1px);}
+  .hint-btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+  .hint-text{
+    margin:0;
+    background:#fff7e3;
+    border-left:3px solid var(--gold);
+    border-radius:8px;
+    padding:12px 14px;
+    color:var(--ink-soft);
+    font-size:.92rem;
+    line-height:1.45;
+    animation:fade-slide .3s ease both;
+  }
+  @keyframes fade-slide{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+
+  /* ---------- Feedback ---------- */
+  .feedback{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    animation:fade-slide .35s ease both;
+  }
+  .verdict{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:1.15rem;
+    font-weight:800;
+    letter-spacing:-.2px;
+  }
+  .verdict.ok{color:var(--good-deep);}
+  .verdict.no{color:var(--bad-deep);}
+  .explanation{
+    margin:0;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px 16px;
+    color:var(--ink-soft);
+    font-size:.95rem;
+    line-height:1.55;
+  }
+  .explanation b{color:var(--ink);}
+
+  .next-btn{
+    appearance:none;
+    border:none;
+    border-radius:14px;
+    padding:16px;
+    font-family:inherit;
+    font-size:1.02rem;
+    font-weight:800;
+    letter-spacing:-.1px;
+    cursor:pointer;
+    color:#fff;
+    background:var(--ink);
+    transition:transform .12s ease, opacity .2s ease;
+  }
+  .next-btn:hover{opacity:.9;}
+  .next-btn:active{transform:translateY(1px) scale(.99);}
+  .next-btn:focus-visible{outline:3px solid var(--ink);outline-offset:3px;}
+
+  /* ---------- Completion ---------- */
+  .complete{
+    text-align:center;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow);
+    padding:32px 22px 28px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    align-items:center;
+    animation:card-in .4s ease both;
+    position:relative;
+    overflow:hidden;
+  }
+  .complete .big-stars{
+    font-size:2.7rem;
+    line-height:1;
+    letter-spacing:6px;
+    color:var(--gold);
+    animation:star-pop .6s cubic-bezier(.18,.9,.32,1.4) both;
+  }
+  .complete h2{
+    margin:0;
+    font-size:1.4rem;
+    font-weight:800;
+    letter-spacing:-.3px;
+  }
+  .complete .perfect-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:.95rem;
+    font-weight:800;
+    padding:9px 16px;
+    border-radius:999px;
+  }
+  .complete .perfect-badge.win{
+    color:var(--good-deep);
+    background:var(--good-tint);
+    border:1px solid var(--good);
+  }
+  .complete .perfect-badge.lost{
+    color:var(--ink-mute);
+    background:var(--card-2);
+    border:1px solid var(--line);
+  }
+  .complete .check-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    width:100%;
+    max-width:280px;
+  }
+  .complete .check-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:11px 16px;
+    font-weight:700;
+    font-size:.96rem;
+  }
+  .complete .check-row .res{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    color:var(--ink-mute);
+    font-weight:700;
+  }
+  .complete .check-row .res .tick{color:var(--good-deep);}
+  .complete .come-back{
+    color:var(--ink-mute);
+    font-size:.95rem;
+    margin:0;
+  }
+  .copy-btn{
+    appearance:none;
+    border:1px solid var(--line-strong);
+    background:#fff;
+    color:var(--ink);
+    border-radius:14px;
+    padding:15px 22px;
+    font-family:inherit;
+    font-size:1rem;
+    font-weight:800;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    transition:transform .12s ease, border-color .2s ease, background .2s ease;
+  }
+  .copy-btn:hover{border-color:var(--ink);}
+  .copy-btn:active{transform:translateY(1px) scale(.99);}
+  .copy-btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+  .copy-btn.copied{border-color:var(--good);color:var(--good-deep);background:var(--good-tint);}
+
+  /* confetti */
+  .confetti{
+    position:fixed;
+    top:-12px;
+    width:10px;
+    height:14px;
+    border-radius:2px;
+    pointer-events:none;
+    z-index:50;
+    will-change:transform,opacity;
+    animation:fall linear forwards;
+  }
+  @keyframes fall{
+    0%{transform:translateY(-20px) rotate(0);opacity:1;}
+    100%{transform:translateY(108vh) rotate(720deg);opacity:.9;}
+  }
+
+  .footnote{
+    text-align:center;
+    color:var(--ink-mute);
+    font-size:.78rem;
+    margin-top:4px;
+  }
+
+  @media (max-width:380px){
+    .brand .name,.brand .num{font-size:1.2rem;}
+    .statement{font-size:.96rem;padding-left:50px;}
+    .level-tab{font-size:.84rem;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
+    .confetti{display:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header>
+    <div class="topline">
+      <div class="brand">
+        <span class="glyph">🎯</span>
+        <span class="name">One False</span>
+        <span class="num" id="dayNum">#1</span>
+      </div>
+      <div class="streak" id="streakChip" hidden>
+        <span class="flame">🔥</span><span id="streakText">Streak: 0 Days</span>
+      </div>
+    </div>
+    <p class="tagline">Two statements are true. <b>One is false.</b></p>
+  </header>
+
+  <section class="progress" aria-live="polite">
+    <div class="progress-top">
+      <span class="label">Today's Progress</span>
+      <div class="stars" id="stars" role="img" aria-label="No levels completed yet">
+        <span class="pending" data-i="0">•</span><span class="pending" data-i="1">•</span><span class="pending" data-i="2">•</span>
+      </div>
+    </div>
+    <div class="perfect" id="perfectStatus" hidden></div>
+  </section>
+
+  <div class="levels" role="tablist" aria-label="Difficulty levels">
+    <button class="level-tab" id="tab-easy" role="tab" data-level="easy" aria-selected="true">
+      <span class="lvl-name">Easy</span><span class="lvl-state" data-state>•</span>
+    </button>
+    <button class="level-tab" id="tab-medium" role="tab" data-level="medium" aria-selected="false">
+      <span class="lvl-name">Medium</span><span class="lvl-state" data-state>🔒</span>
+    </button>
+    <button class="level-tab" id="tab-hard" role="tab" data-level="hard" aria-selected="false">
+      <span class="lvl-name">Hard</span><span class="lvl-state" data-state>🔒</span>
+    </button>
+  </div>
+
+  <main id="stage"><!-- card or completion screen injected here --></main>
+
+  <p class="footnote">A new puzzle every day · No sign-in required</p>
+</div>
+
+<script>
+const DAILY_SETS = [
+  { // Day 1
+    easy:{category:"Animals",statements:["Dolphins are a type of fish.","Cats are mammals.","Birds lay eggs."],falseIndex:0,hint:"Think about how each of these animals breathes.",explanation:"Dolphins are mammals, not fish — they breathe air through lungs and nurse their young. Cats are mammals, and birds do lay eggs."},
+    medium:{category:"Science",statements:["The human body is more than half water by weight.","Humans only use about 10% of their brains.","Your blood is red, not blue, even inside your veins."],falseIndex:1,hint:"One of these is a famous myth about the mind.",explanation:"The '10% of your brain' claim is a myth — brain scans show we use virtually all of it, just not all at once. The body is mostly water, and blood is always red."},
+    hard:{category:"Space",statements:["Jupiter is the largest planet in the Solar System.","Venus is the hottest planet in the Solar System.","Saturn is the densest planet in the Solar System."],falseIndex:2,hint:"Picture which planet could float in water.",explanation:"Saturn is the least dense planet, not the densest — it's so light it would float in water. Jupiter is the largest planet, and Venus is the hottest thanks to its thick atmosphere."}
+  },
+  { // Day 2
+    easy:{category:"Geography",statements:["Antarctica is the hottest continent on Earth.","Egypt is located in Africa.","The Atlantic is an ocean."],falseIndex:0,hint:"Think about where penguins and ice live.",explanation:"Antarctica is the coldest continent, not the hottest. Egypt is in Africa, and the Atlantic is one of Earth's oceans."},
+    medium:{category:"History",statements:["Vikings sailed from Scandinavia.","Vikings wore horned helmets into battle.","Vikings reached North America around 1000 CE, before Columbus."],falseIndex:1,hint:"One popular image of Vikings was invented much later.",explanation:"Horned Viking helmets are a myth popularized by 19th-century opera and art — no horned battle helmets have been found. Vikings did come from Scandinavia and reached North America centuries before Columbus."},
+    hard:{category:"Geography",statements:["Canada has the longest coastline of any country.","Russia is the largest country by land area.","Australia is larger than Europe in total area."],falseIndex:2,hint:"Compare the landmass of the continent with the country.",explanation:"Europe (about 10.2 million km²) is larger than Australia (about 7.7 million km²). Canada really does have the longest coastline, and Russia is the largest country by area."}
+  },
+  { // Day 3
+    easy:{category:"Food",statements:["Lemons are sweet, like candy.","Bread is made from flour.","Bananas turn yellow as they ripen."],falseIndex:0,hint:"Imagine actually biting into each one.",explanation:"Lemons are sour, not sweet — that sharp taste comes from citric acid. Bread is made from flour, and bananas yellow as they ripen."},
+    medium:{category:"Technology",statements:["A byte is made up of 8 bits.","Private or 'incognito' browsing makes you completely anonymous online.","Deleting a file usually leaves recoverable traces on the drive."],falseIndex:1,hint:"Think about who can still see your activity.",explanation:"Private browsing only stops your own device from saving history — your internet provider, employer, and the sites you visit can still see you. A byte is 8 bits, and deleted files often remain recoverable."},
+    hard:{category:"Music",statements:["Beethoven's Ninth Symphony ends with a famous choral 'Ode to Joy.'","Mozart composed during the Classical period.","The saxophone belongs to the brass family of instruments."],falseIndex:2,hint:"It's about how the instrument makes its sound, not what it's made of.",explanation:"The saxophone is a woodwind — it makes sound with a reed, even though it's made of brass. Beethoven's Ninth has a choral finale, and Mozart was a Classical-era composer."}
+  },
+  { // Day 4
+    easy:{category:"Sports",statements:["In soccer, players mainly move the ball with their hands.","Tennis is played with a racket.","Basketball involves shooting a ball through a hoop."],falseIndex:0,hint:"Picture how a soccer player actually controls the ball.",explanation:"Soccer (football) is played mostly with the feet — only the goalkeeper may use hands in the box. Tennis uses a racket, and basketball is about shooting through a hoop."},
+    medium:{category:"Animals",statements:["Bats use echolocation to find their way in the dark.","Bulls charge because they are enraged by the color red.","Ostriches do not actually bury their heads in the sand."],falseIndex:1,hint:"Consider what a bull's eyes can and can't see.",explanation:"Bulls are colorblind to red — they react to the movement of the cape, not its color. Bats navigate by echolocation, and ostriches don't bury their heads."},
+    hard:{category:"History",statements:["The Great Fire of London occurred in 1666.","Julius Caesar was never officially crowned emperor of Rome.","The Hundred Years' War lasted exactly 100 years."],falseIndex:2,hint:"The name of the war is a little misleading.",explanation:"The Hundred Years' War actually ran from 1337 to 1453 — about 116 years. The Great Fire of London was in 1666, and Caesar was a dictator but never 'emperor' (Augustus was the first)."}
+  },
+  { // Day 5
+    easy:{category:"Nature",statements:["Fire is cold to the touch.","The ocean contains salt water.","Trees produce oxygen."],falseIndex:0,hint:"One of these would burn you.",explanation:"Fire is hot, not cold — it releases heat and light as things burn. The ocean is salty, and trees produce oxygen."},
+    medium:{category:"Geography",statements:["The Nile is one of the longest rivers on Earth.","The Great Wall of China is easily visible from space with the naked eye.","Mount Kilimanjaro is located in Africa."],falseIndex:1,hint:"Think about how wide the wall actually is.",explanation:"The Great Wall is far too narrow to see unaided from space — astronauts confirm you can't pick it out with the naked eye. The Nile is among the longest rivers, and Kilimanjaro is in Africa."},
+    hard:{category:"Science",statements:["Sound travels faster in water than in air.","Sound travels faster through steel than through water.","Sound travels faster in a vacuum than in air."],falseIndex:2,hint:"Sound needs something to travel through.",explanation:"Sound can't travel through a vacuum at all — it needs a medium like air, water, or steel. It moves faster in denser, stiffer materials, so air < water < steel."}
+  },
+  { // Day 6
+    easy:{category:"History",statements:["Dinosaurs and humans worked together to build the pyramids.","Ancient Egypt was ruled by pharaohs.","The pyramids of Egypt are thousands of years old."],falseIndex:0,hint:"Think about whether dinosaurs and people ever overlapped.",explanation:"Dinosaurs went extinct about 66 million years before humans existed, so they couldn't have built anything with us. Egypt had pharaohs, and the pyramids are millennia old."},
+    medium:{category:"Famous People",statements:["Albert Einstein developed the theory of relativity.","Einstein failed mathematics as a student.","Einstein was born in Germany."],falseIndex:1,hint:"This 'fact' is often used to comfort struggling students.",explanation:"Einstein actually excelled at math from a young age — the 'failed math' story is a myth. He was born in Germany and developed the theory of relativity."},
+    hard:{category:"Geography",statements:["Istanbul sits on two continents, Europe and Asia.","The Bosphorus strait runs through Istanbul.","Istanbul is the capital of Turkey."],falseIndex:2,hint:"The biggest city isn't always the capital.",explanation:"The capital of Turkey is Ankara, not Istanbul — Istanbul is the largest city but not the seat of government. It does straddle two continents along the Bosphorus."}
+  },
+  { // Day 7
+    easy:{category:"Space",statements:["The Sun orbits around the Earth.","The Sun gives off light and heat.","Earth has one Moon."],falseIndex:0,hint:"Think about what's really at the center.",explanation:"Earth orbits the Sun, not the other way around. The Sun does give off light and heat, and Earth has one Moon."},
+    medium:{category:"Science",statements:["Glass is a solid, not a slowly flowing liquid, at room temperature.","A penny dropped from a skyscraper could kill a pedestrian below.","Hot water can sometimes freeze faster than cold water under the right conditions."],falseIndex:1,hint:"Think about a penny's shape as it falls.",explanation:"A falling penny tumbles and has a low terminal velocity, so it would sting at most — not kill. Glass is an amorphous solid (old windows aren't 'flowing'), and the Mpemba effect lets hot water sometimes freeze first."},
+    hard:{category:"Technology",statements:["Ada Lovelace is often called the first computer programmer.","The computing term 'bug' was linked to a real insect found in an early machine.","The first general-purpose electronic computer, ENIAC, was built in the 1980s."],falseIndex:2,hint:"Room-sized computers came long before personal ones.",explanation:"ENIAC was completed in the 1940s, not the 1980s — it filled a room and used thousands of vacuum tubes. Lovelace is credited as an early programmer, and a real moth once caused a famous computer 'bug.'"}
+  },
+  { // Day 8
+    easy:{category:"Canada",statements:["Canada is located in Africa.","Hockey is popular in Canada.","Canada is in North America."],falseIndex:0,hint:"Think about which continent Canada sits on.",explanation:"Canada is in North America, not Africa. Hockey is hugely popular there, and it sits north of the United States."},
+    medium:{category:"Canada",statements:["Canada has two official languages.","The capital of Canada is Toronto.","Canada is the second-largest country in the world by area."],falseIndex:1,hint:"The biggest city isn't the capital here either.",explanation:"Canada's capital is Ottawa, not Toronto — Toronto is the largest city. Canada has two official languages (English and French) and is the second-largest country by area."},
+    hard:{category:"Canada",statements:["Canada became a country through Confederation in 1867.","The maple-leaf flag was adopted in 1965.","Canada shares the world's longest border with Mexico."],falseIndex:2,hint:"Picture which countries Canada actually touches.",explanation:"Canada's long land border is with the United States, not Mexico — and it's the longest international border in the world. Confederation was in 1867, and the maple-leaf flag was adopted in 1965."}
+  },
+  { // Day 9
+    easy:{category:"Music",statements:["A trumpet is played by kicking it.","A guitar has strings.","A drum is played by hitting it."],falseIndex:0,hint:"Think about how you'd actually play a trumpet.",explanation:"A trumpet is played by blowing air and buzzing the lips into a mouthpiece, not kicking it. A guitar has strings, and a drum is struck."},
+    medium:{category:"History",statements:["Napoleon was born on the island of Corsica.","Napoleon Bonaparte was unusually short for his era.","Napoleon led France in the early 1800s."],falseIndex:1,hint:"His nickname may have misled history.",explanation:"Napoleon was about average height for his time — the 'short' image came from propaganda and a mix-up between French and British units. He was born in Corsica and led France in the early 1800s."},
+    hard:{category:"Science",statements:["Diamond and graphite are both made of pure carbon.","Diamonds can actually burn, since they're made of carbon.","Diamond is the hardest natural material, so it can never shatter."],falseIndex:2,hint:"Hardness and toughness are not the same thing.",explanation:"Hardness resists scratching, but diamonds can still shatter from a sharp blow — they're hard, not unbreakable. Diamond and graphite are both pure carbon, and diamonds can burn at high temperatures."}
+  },
+  { // Day 10
+    easy:{category:"Technology",statements:["A monitor is used to smell websites.","A keyboard is used to type.","A mouse helps move the cursor."],falseIndex:0,hint:"Screens appeal to one sense in particular.",explanation:"A monitor displays images for you to see — it has nothing to do with smell. A keyboard is for typing, and a mouse moves the cursor."},
+    medium:{category:"Space",statements:["From space, the Sun appears essentially white.","The Sun is naturally yellow, which is why it looks yellow from space.","Sunlight contains all the colors of the rainbow."],falseIndex:1,hint:"Our atmosphere changes how the Sun looks.",explanation:"The Sun is essentially white; it only looks yellow or orange from the ground because the atmosphere scatters blue light. From space it appears white, and sunlight contains every rainbow color."},
+    hard:{category:"Animals",statements:["A group of flamingos is called a flamboyance.","Flamingos get their pink color from pigments in the food they eat.","Flamingos are born bright pink."],falseIndex:2,hint:"Their famous color isn't there from day one.",explanation:"Flamingo chicks hatch gray or white and slowly turn pink from pigments (carotenoids) in their diet. A flamingo group is a 'flamboyance,' and their color does come from food."}
+  },
+  { // Day 11
+    easy:{category:"Geography",statements:["The North Pole is hot and tropical.","Deserts are usually dry.","Rivers carry water."],falseIndex:0,hint:"Think about the ice at the top of the globe.",explanation:"The North Pole is freezing and ice-covered, not tropical. Deserts are dry, and rivers carry water."},
+    medium:{category:"Food",statements:["Adding salt to water raises its boiling point slightly.","Searing a steak 'seals in' its juices.","Honey can stay edible almost indefinitely when stored properly."],falseIndex:1,hint:"This kitchen 'rule' has been tested and debunked.",explanation:"Searing doesn't seal in juices — it creates flavor through browning, but moisture still escapes. Salt does slightly raise water's boiling point, and honey can last almost indefinitely."},
+    hard:{category:"Sports",statements:["A regulation soccer match lasts 90 minutes plus stoppage time.","In tennis, a score of 'love' means zero.","An Olympic marathon is exactly 40 kilometers long."],falseIndex:2,hint:"The marathon distance is an odd, specific number.",explanation:"A marathon is about 42.195 km, not a round 40 — the distance was fixed at the 1908 London Olympics. A soccer match is 90 minutes plus stoppage, and 'love' means zero in tennis."}
+  },
+  { // Day 12
+    easy:{category:"Science",statements:["Rocks grow on trees like fruit.","Plants need sunlight to grow.","Water can freeze into ice."],falseIndex:0,hint:"Think about where rocks actually come from.",explanation:"Rocks form from minerals and geological processes — they don't grow on trees. Plants need sunlight, and water freezes into ice."},
+    medium:{category:"Animals",statements:["Most birds have a fairly weak sense of smell compared with their eyesight.","If you touch a baby bird, its mother will smell you and abandon it.","Owls can turn their heads very far, but not a full 360 degrees."],falseIndex:1,hint:"This warning relies on a sense most birds barely use.",explanation:"Most birds have a poor sense of smell, so handling a chick won't make a parent abandon it — that's a myth. Birds rely mainly on eyesight, and owls turn their heads far but not all the way around."},
+    hard:{category:"History",statements:["The Wright brothers made the first powered airplane flight in 1903.","Their first flight lasted only about 12 seconds.","Charles Lindbergh was the first person ever to fly across the Atlantic Ocean."],falseIndex:2,hint:"Lindbergh's achievement had a very specific 'first.'",explanation:"Lindbergh made the first solo nonstop transatlantic flight in 1927, but Alcock and Brown had crossed the Atlantic nonstop back in 1919. The Wright brothers flew first in 1903, lasting about 12 seconds."}
+  },
+  { // Day 13
+    easy:{category:"Animals",statements:["Snakes have legs and run quickly.","Fish live in water.","Cows eat grass."],falseIndex:0,hint:"Picture how a snake actually moves.",explanation:"Snakes have no legs — they move by slithering. Fish live in water, and cows graze on grass."},
+    medium:{category:"Geography",statements:["The Equator is, on average, the hottest line of latitude.","Whether a sink drains clockwise or counter-clockwise is decided by which hemisphere you're in.","Earth is slightly flattened at the poles."],falseIndex:1,hint:"The force behind this idea is far too weak at that scale.",explanation:"The Coriolis effect is far too small to control a draining sink — basin shape matters far more, so the hemisphere 'rule' is a myth. The Equator is the hottest latitude, and Earth bulges at the middle."},
+    hard:{category:"Space",statements:["A day on Venus is longer than a year on Venus.","Venus rotates in the opposite direction to most planets.","Venus is the closest planet to the Sun."],falseIndex:2,hint:"Count outward from the Sun.",explanation:"Mercury is the closest planet to the Sun; Venus is the second. Strangely, Venus spins backward and so slowly that its day is longer than its year."}
+  },
+  { // Day 14
+    easy:{category:"Sports",statements:["In chess, the goal is to eat the most pancakes.","Runners compete in races.","A goal in soccer scores for a team."],falseIndex:0,hint:"Think about what actually wins a chess game.",explanation:"Chess is won by checkmating the opponent's king — pancakes aren't involved. Runners race, and soccer goals score points."},
+    medium:{category:"Science",statements:["Tall buildings can be struck by lightning many times a year.","Lightning never strikes the same place twice.","A lightning bolt can be hotter than the surface of the Sun."],falseIndex:1,hint:"Skyscrapers prove one of these wrong.",explanation:"Lightning often strikes the same spot repeatedly — tall structures get hit again and again. A bolt can reach about 30,000°C, far hotter than the Sun's surface near 5,500°C."},
+    hard:{category:"Famous People",statements:["Thomas Edison held over a thousand U.S. patents.","Edison developed a practical, long-lasting electric light bulb.","Thomas Edison invented the very first light bulb entirely from scratch."],falseIndex:2,hint:"He improved an idea others had already started.",explanation:"Edison didn't invent the first light bulb — inventors had made earlier versions; he created the first practical, long-lasting one. He held over a thousand patents and made the bulb commercially viable."}
+  },
+  { // Day 15
+    easy:{category:"Food",statements:["Spaghetti grows on spaghetti trees.","Milk comes from cows.","Eggs come from chickens."],falseIndex:0,hint:"Think about what pasta is really made from.",explanation:"Spaghetti is made from wheat flour and water, not grown on trees. Milk comes from cows, and eggs from chickens."},
+    medium:{category:"Technology",statements:["Public Wi-Fi networks can expose users to security risks.","Apple computers are completely immune to all viruses and malware.","Using strong, unique passwords improves your account security."],falseIndex:1,hint:"No mainstream computer is truly virus-proof.",explanation:"Macs can get malware too — the idea that they're immune is a myth, just a smaller share of attacks targets them. Public Wi-Fi carries real risks, and strong passwords help security."},
+    hard:{category:"Music",statements:["Mozart was a child prodigy who composed from a very young age.","Mozart wrote a famous set of variations on the tune behind 'Twinkle, Twinkle, Little Star.'","Mozart composed the original melody of 'Twinkle, Twinkle, Little Star.'"],falseIndex:2,hint:"He borrowed the tune rather than inventing it.",explanation:"The melody comes from an older French folk song ('Ah! vous dirai-je, maman') — Mozart wrote variations on it but didn't compose it. He was a child prodigy and did create those well-known variations."}
+  },
+  { // Day 16
+    easy:{category:"Nature",statements:["The Sun is a small, cold rock.","Snow is cold.","Leaves can be green."],falseIndex:0,hint:"Think about what the Sun is really made of.",explanation:"The Sun is an enormous ball of hot glowing gas (plasma), not a small cold rock. Snow is cold, and many leaves are green."},
+    medium:{category:"History",statements:["Educated people in the 1400s generally knew the Earth was round.","Everyone in Columbus's time believed the Earth was flat.","Columbus first reached islands in the Caribbean, not mainland North America."],falseIndex:1,hint:"Scholars had known Earth's shape for a long time.",explanation:"The idea that people then thought Earth was flat is a myth — educated Europeans had known it was round since antiquity. Columbus first landed in the Caribbean, not on the mainland."},
+    hard:{category:"Science",statements:["The chemical symbol for gold is Au.","The chemical symbol for sodium is Na.","The chemical symbol for potassium is Po."],falseIndex:2,hint:"One of these symbols belongs to a different element.",explanation:"Potassium's symbol is K (from Latin 'kalium') — 'Po' is polonium. Gold is Au (from 'aurum'), and sodium is Na (from 'natrium')."}
+  },
+  { // Day 17
+    easy:{category:"Animals",statements:["Elephants can fit inside a teacup.","Bees can fly.","Frogs can hop."],falseIndex:0,hint:"Picture the size of a real elephant.",explanation:"Elephants are the largest land animals and could never fit in a teacup. Bees fly, and frogs hop."},
+    medium:{category:"Space",statements:["Astronauts float in orbit because they are in continuous free fall around Earth.","Astronauts float because there is no gravity at all in space.","The International Space Station still sits well within Earth's gravity."],falseIndex:1,hint:"There's plenty of gravity where the ISS orbits.",explanation:"Gravity is still strong in orbit — astronauts float because they're in constant free fall, circling Earth so fast they keep 'missing' it. The ISS orbits within Earth's gravity, which is what holds it there."},
+    hard:{category:"Geography",statements:["The Nile generally flows from south to north.","The Nile is one of the longest rivers in the world.","The Nile begins at a single, undisputed source spring."],falseIndex:2,hint:"Rivers this large rarely have one tidy starting point.",explanation:"The Nile's source is debated and fed by multiple tributaries (including Lake Victoria and rivers in the highlands), not one spring. It flows northward and is among the world's longest rivers."}
+  },
+  { // Day 18
+    easy:{category:"Technology",statements:["Printers are mainly used to cook food.","Phones can make calls.","The internet connects computers worldwide."],falseIndex:0,hint:"Think about what a printer actually produces.",explanation:"Printers put ink or toner on paper — they don't cook. Phones make calls, and the internet links computers."},
+    medium:{category:"Food",statements:["Carrots contain vitamin A, which supports healthy eyesight.","Eating carrots gives people dramatic, night-vision-like sight.","The 'carrots boost night vision' idea was amplified by wartime propaganda."],falseIndex:1,hint:"The strongest version of this claim started as a cover story.",explanation:"Carrots help maintain normal eye health but won't grant superhuman night vision — British WWII propaganda exaggerated it to hide radar technology. Carrots do contain vitamin A."},
+    hard:{category:"Sports",statements:["The modern Olympic Games were revived in 1896.","The Olympic symbol has five interlocking rings.","Each of the five Olympic rings stands for one specific continent."],falseIndex:2,hint:"The colors were chosen for a broader reason.",explanation:"The five ring colors (plus the white background) were picked because at least one appears on every national flag — no single ring represents a particular continent. The modern Games began in 1896 with the five-ring symbol."}
+  },
+  { // Day 19
+    easy:{category:"Geography",statements:["Lakes are made of sand instead of water.","Mountains are tall.","Islands are surrounded by water."],falseIndex:0,hint:"Think about what fills a lake.",explanation:"Lakes are bodies of water, not sand. Mountains rise high, and islands are surrounded by water."},
+    medium:{category:"Science",statements:["The popping sound when you crack a knuckle comes from gas bubbles in the joint fluid.","Cracking your knuckles causes arthritis.","There's no strong evidence that knuckle-cracking causes arthritis."],falseIndex:1,hint:"Long-term studies found no link here.",explanation:"Knuckle-cracking hasn't been shown to cause arthritis — studies of lifelong crackers found no increased risk. The pop is gas bubbles collapsing in the joint fluid."},
+    hard:{category:"History",statements:["In Roman numerals, 50 is written as L.","In Roman numerals, 500 is written as D.","In Roman numerals, 1000 is written as C."],falseIndex:2,hint:"One of these numerals stands for a much smaller value.",explanation:"In Roman numerals 1000 is M, not C — the letter C stands for 100. L is 50 and D is 500."}
+  },
+  { // Day 20
+    easy:{category:"Music",statements:["Headphones are worn on your feet.","Singing uses your voice.","A piano has keys."],falseIndex:0,hint:"Think about where headphones actually go.",explanation:"Headphones are worn over the ears, not the feet. Singing uses the voice, and a piano has keys."},
+    medium:{category:"Animals",statements:["Goldfish can actually remember things for weeks or months.","Goldfish have a memory that lasts only about three seconds.","Fish can sense and respond to changes in their environment."],falseIndex:1,hint:"That tiny memory span is a common myth.",explanation:"Goldfish can remember things for weeks or even months — the 'three-second memory' is a myth. Fish do sense and respond to their surroundings."},
+    hard:{category:"Space",statements:["Sunlight takes about 8 minutes to reach Earth.","The nearest star beyond the Sun is over 4 light-years away.","Saturn is the only planet in the Solar System with rings."],falseIndex:2,hint:"Other giant planets are hiding rings too.",explanation:"Saturn isn't the only ringed planet — Jupiter, Uranus, and Neptune all have ring systems; Saturn's are just the brightest. Sunlight takes about 8 minutes to arrive, and the nearest star is over 4 light-years off."}
+  },
+  { // Day 21
+    easy:{category:"Science",statements:["People can live forever with no food or water at all.","The daytime sky often looks blue.","Humans need air to breathe."],falseIndex:0,hint:"Think about what bodies need to survive.",explanation:"Humans can't survive indefinitely without food or water — both are essential. The sky often looks blue, and we need air to breathe."},
+    medium:{category:"Famous People",statements:["Walt Disney co-founded a major animation studio.","Walt Disney's body was frozen (cryogenically preserved) after he died.","Walt Disney was cremated after his death."],falseIndex:1,hint:"A famous rumor about him isn't true.",explanation:"The story that Walt Disney was cryogenically frozen is an urban legend — he was actually cremated in 1966. He did co-found the famous animation studio that bears his name."},
+    hard:{category:"Technology",statements:["'The cloud' really means remote servers you reach over the internet.","HTTPS encrypts data in transit, while plain HTTP does not.","The 'G' in '5G' stands for 'gigabytes.'"],falseIndex:2,hint:"Each new mobile network is a step forward in time.",explanation:"The 'G' in 5G stands for 'generation' — the fifth generation of mobile networks, not gigabytes. The cloud is remote servers, and HTTPS adds encryption that HTTP lacks."}
+  },
+  { // Day 22
+    easy:{category:"Canada",statements:["Canada is the smallest country in the world.","Many parts of Canada have cold winters.","The maple leaf appears on Canada's flag."],falseIndex:0,hint:"Think about how much land Canada covers.",explanation:"Canada is one of the largest countries on Earth, not the smallest. It has cold winters in many regions and a maple leaf on its flag."},
+    medium:{category:"Geography",statements:["Map projections like Mercator stretch areas near the poles.","On common world maps, Greenland looks about the same size as all of Africa, and really is.","In reality, Africa is many times larger than Greenland."],falseIndex:1,hint:"Flat maps can badly distort the truth.",explanation:"Greenland looks huge on Mercator maps, but Africa is actually about 14 times larger — the projection inflates regions near the poles. Africa truly dwarfs Greenland in real area."},
+    hard:{category:"Science",statements:["Water is made of hydrogen and oxygen.","Water expands when it freezes, which is why ice floats.","A given volume of hot water weighs more than the same volume of cold water."],falseIndex:2,hint:"Warming water changes how tightly packed it is.",explanation:"Hot water is slightly less dense, so the same volume weighs a bit less, not more. Water is H₂O, and it expands when freezing, letting ice float."}
+  },
+  { // Day 23
+    easy:{category:"Sports",statements:["Swimmers race on dry land in a pool with no water.","A basketball is round.","Sprinters try to run as fast as they can."],falseIndex:0,hint:"Think about what a pool needs to hold a race.",explanation:"Swimming races happen in water-filled pools, not on dry land. A basketball is round, and sprinters race for speed."},
+    medium:{category:"History",statements:["Marie Antoinette was queen of France before the Revolution.","Marie Antoinette famously told starving peasants to 'let them eat cake.'","There's no solid evidence Marie Antoinette ever said 'Let them eat cake.'"],falseIndex:1,hint:"A famous quote may have been put in her mouth.",explanation:"Historians have found no real evidence Marie Antoinette said 'Let them eat cake' — the phrase appeared in writing before she was even prominent. She was queen of France before the Revolution."},
+    hard:{category:"Geography",statements:["Mount Everest is the highest point above sea level on Earth.","Measured from base to summit, Hawaii's Mauna Kea is taller than Everest.","The deepest ocean trench is shallower than Everest is tall."],falseIndex:2,hint:"Compare the ocean's deepest point with Everest's height.",explanation:"The Mariana Trench is about 11 km deep — deeper than Everest (about 8.8 km) is tall. Everest is the highest point above sea level, while Mauna Kea is taller measured base to summit."}
+  },
+  { // Day 24
+    easy:{category:"Nature",statements:["Mountains float in the air like balloons.","Rain falls from the sky.","Wind can move tree branches."],falseIndex:0,hint:"Think about how heavy a mountain is.",explanation:"Mountains are massive rock formations anchored to the ground — they don't float. Rain falls from clouds, and wind moves branches."},
+    medium:{category:"Animals",statements:["Not every creature called a 'daddy longlegs' is even a spider.","Daddy longlegs are the most venomous spiders, saved only by fangs too small to bite.","The claim that daddy longlegs are the most venomous spiders is a myth."],falseIndex:1,hint:"That dramatic venom claim doesn't hold up.",explanation:"The 'most venomous but harmless' story about daddy longlegs is a myth with no evidence. Confusingly, several different animals share that name, and not all are spiders."},
+    hard:{category:"Music",statements:["An orchestra usually tunes to the note A.","A cappella means singing without instrumental backing.","One octave spans twelve white keys on a piano."],falseIndex:2,hint:"Count the white keys from one C to the next.",explanation:"An octave spans seven white keys (eight if you count both ends) — twelve is the total counting black keys too. Orchestras tune to A, and a cappella means voices alone."}
+  },
+  { // Day 25
+    easy:{category:"Food",statements:["Pizza is a kind of metal.","Oranges are a fruit.","Water is something you can drink."],falseIndex:0,hint:"Think about whether you'd eat it or build with it.",explanation:"Pizza is a food, not a metal. Oranges are a fruit, and water is a drink."},
+    medium:{category:"Science",statements:["Body heat escapes from any uncovered skin, not mainly the head.","You lose most of your body heat through your head.","Wearing a hat helps in the cold partly because the head is often left bare."],falseIndex:1,hint:"Your head isn't a special heat-leaking zone.",explanation:"You don't lose most heat through your head — heat escapes from any exposed skin in proportion to its area; the old claim came from a flawed study. A hat helps mainly because the head is often uncovered."},
+    hard:{category:"Space",statements:["The Moon has no breathable atmosphere like Earth's.","The same side of the Moon always faces Earth.","The Moon produces its own light, like a small star."],falseIndex:2,hint:"Where does moonlight actually come from?",explanation:"The Moon doesn't make its own light — it reflects sunlight. It has essentially no atmosphere, and tidal locking keeps the same side facing Earth."}
+  },
+  { // Day 26
+    easy:{category:"Technology",statements:["USB cables are used to water plants.","Cameras can take photos.","Calculators help with math."],falseIndex:0,hint:"Think about what a USB cable actually carries.",explanation:"USB cables carry data and power between devices — not water. Cameras take photos, and calculators do math."},
+    medium:{category:"History",statements:["The Great Wall of China is really many walls built over many centuries.","The Great Wall of China is a single continuous wall built all at once.","Some parts of the Great Wall are over 2,000 years old."],falseIndex:1,hint:"It wasn't one project with one finish date.",explanation:"The Great Wall isn't a single wall — it's a network of walls built and rebuilt by different dynasties over centuries. Some sections are more than 2,000 years old."},
+    hard:{category:"Famous People",statements:["Isaac Newton described the laws of motion and universal gravitation.","Newton served as Master of England's Royal Mint.","Isaac Newton won a Nobel Prize in Physics for his work on gravity."],falseIndex:2,hint:"Check whether the timing even lines up.",explanation:"Newton couldn't have won a Nobel Prize — he died in 1727, and the prizes didn't begin until 1901. He did formulate the laws of motion and gravity and ran the Royal Mint."}
+  },
+  { // Day 27
+    easy:{category:"Animals",statements:["Goldfish can sing songs out loud.","Dogs can bark.","Cats can purr."],falseIndex:0,hint:"Think about whether fish make voices.",explanation:"Goldfish don't sing — fish don't have voices like that. Dogs bark, and cats purr."},
+    medium:{category:"Geography",statements:["Because Earth bulges at the Equator, Ecuador's Mount Chimborazo is the farthest summit from Earth's center.","Mount Everest's summit is the point farthest from the center of the Earth.","Earth is not a perfect sphere."],falseIndex:1,hint:"'Highest above sea level' and 'farthest from the center' aren't the same.",explanation:"Thanks to Earth's equatorial bulge, Chimborazo's peak (near the Equator) is farther from Earth's center than Everest's, even though Everest is higher above sea level. Earth isn't a perfect sphere."},
+    hard:{category:"Science",statements:["Helium is lighter than air, so helium balloons rise.","Helium is the second most abundant element in the universe.","Helium is highly flammable, which is why it lifts balloons."],falseIndex:2,hint:"Think about why some airships once caught fire and helium ones don't.",explanation:"Helium is inert and non-flammable — it lifts balloons simply because it's lighter than air; the flammable lifting gas was hydrogen. Helium is also the second most abundant element in the universe."}
+  },
+  { // Day 28
+    easy:{category:"Sports",statements:["Boxers compete by painting portraits.","Soccer is played with a ball.","Cyclists ride bicycles."],falseIndex:0,hint:"Think about what boxers actually do in a match.",explanation:"Boxing is a combat sport of punches, not painting. Soccer uses a ball, and cyclists ride bicycles."},
+    medium:{category:"Animals",statements:["Many shark species can rest while water is pushed over their gills.","All sharks must keep swimming constantly or they will die.","Sharks have existed on Earth longer than trees have."],falseIndex:1,hint:"Only some sharks have that non-stop requirement.",explanation:"Only certain sharks must keep moving to breathe — many can pump water over their gills and rest on the seafloor. Remarkably, sharks are older than trees."},
+    hard:{category:"History",statements:["The first modern Olympic Games were held in Athens.","The ancient Olympic Games were held in Olympia, Greece.","Team ball sports were the main events of the ancient Olympic Games."],falseIndex:2,hint:"Ancient Olympic glory was mostly individual.",explanation:"The ancient Olympics centered on individual events like running, wrestling, boxing, and chariot racing — not team ball games. The modern Games began in Athens, and the ancient ones were held at Olympia."}
+  },
+  { // Day 29
+    easy:{category:"Food",statements:["Ice cream is best served boiling hot.","Soup is usually served warm.","Apples can be red or green."],falseIndex:0,hint:"Think about what would happen to ice cream when heated.",explanation:"Ice cream is served frozen — heat would just melt it. Soup is usually warm, and apples come in red and green."},
+    medium:{category:"Science",statements:["Controlled studies haven't found that sugar makes most kids hyperactive.","Eating sugar reliably makes children hyperactive.","Too much sugar can still contribute to other health problems."],falseIndex:1,hint:"The 'sugar high' link is weaker than people assume.",explanation:"Careful studies haven't found that sugar causes hyperactivity in most children — the belief persists partly from expectation. Excess sugar can still harm health in other ways."},
+    hard:{category:"Technology",statements:["The QWERTY keyboard layout dates back to the 1800s.","'Spam' for junk email is named after a brand of canned meat.","The first SMS text message was sent in the 1970s."],falseIndex:2,hint:"Texting is younger than you might guess.",explanation:"The first SMS text message was sent in 1992, not the 1970s. The QWERTY layout dates to the 1800s typewriter era, and 'spam' email borrowed the canned-meat brand's name."}
+  },
+  { // Day 30
+    easy:{category:"Nature",statements:["The ocean is completely dry, with no water at all.","Bees can make honey.","Trees can grow leaves."],falseIndex:0,hint:"Think about what fills the ocean.",explanation:"The ocean is full of water — it's the largest body of water on Earth. Bees make honey, and trees grow leaves."},
+    medium:{category:"Geography",statements:["Movement of tectonic plates can change a mountain's height over time.","Once a mountain forms, its height never changes again.","Mount Everest is slowly getting taller as plates push together."],falseIndex:1,hint:"Mountains are still on the move.",explanation:"Mountains do change height — they can rise from colliding plates or shrink from erosion; Everest is slowly rising. Tectonic movement is what reshapes them over time."},
+    hard:{category:"Space",statements:["There are more stars in the observable universe than grains of sand on all of Earth's beaches.","A black hole's gravity can bend space and time around it.","On a quiet night you can faintly hear the Sun's surface as a low hum."],falseIndex:2,hint:"Sound needs a medium that space doesn't provide.",explanation:"Sound can't travel through the vacuum of space, so the Sun's roar never reaches our ears. Estimates really do put the stars in the observable universe above the grains of sand on Earth, and black holes warp space and time."}
+  }
+  // ADD NEW DAILY SETS HERE
+];
+
+</script>
+<script>
+/* ===== DAILY_SETS data injected above this script ===== */
+
+/* ---------- Day number (epoch: Jan 1, 2026 = Day #1) ---------- */
+function getDayIndex(){
+  // Use local date to keep "today" consistent for the player.
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const epoch = new Date(2026, 0, 1); // Jan 1 2026, local
+  const msPerDay = 86400000;
+  return Math.floor((today - epoch) / msPerDay); // 0-based days since epoch
+}
+const DAY_INDEX = getDayIndex();
+const DAY_NUMBER = DAY_INDEX + 1;                 // human-facing #
+const SET_INDEX = ((DAY_INDEX % DAILY_SETS.length) + DAILY_SETS.length) % DAILY_SETS.length;
+const TODAY_SET = DAILY_SETS[SET_INDEX];
+const LEVELS = ['easy','medium','hard'];
+const LEVEL_LABEL = {easy:'Easy', medium:'Medium', hard:'Hard'};
+
+/* ---------- Per-day in-memory state ---------- */
+const state = {
+  current: 'easy',
+  unlocked: {easy:true, medium:false, hard:false},
+  done:     {easy:false, medium:false, hard:false},
+  answered: {easy:false, medium:false, hard:false},
+  hintUsed: {easy:false, medium:false, hard:false},
+};
+
+// Star for a level: '⭐' solved without hint, '☆' solved with hint, null if not done.
+function starFor(level){
+  if(!state.done[level]) return null;
+  return state.hintUsed[level] ? '☆' : '⭐';
+}
+function starPattern(){
+  return LEVELS.map(l=> starFor(l) || '·').join('');
+}
+function anyHintUsed(){ return LEVELS.some(l=>state.hintUsed[l]); }
+function allDone(){ return LEVELS.every(l=>state.done[l]); }
+function isPerfectDay(){ return allDone() && !anyHintUsed(); }
+
+/* ---------- localStorage: streak only ---------- */
+const LS_KEY = 'oneFalse.streak.v1';
+function loadStreak(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return {streak:0, lastDay:null};
+    const o = JSON.parse(raw);
+    return {streak: o.streak||0, lastDay: (o.lastDay===undefined?null:o.lastDay)};
+  }catch(e){ return {streak:0, lastDay:null}; }
+}
+function saveStreak(o){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(o)); }catch(e){}
+}
+function commitStreakForToday(){
+  const data = loadStreak();
+  if(data.lastDay === DAY_INDEX) return data.streak; // already counted today
+  if(data.lastDay === DAY_INDEX - 1){
+    data.streak = (data.streak||0) + 1;              // consecutive day
+  }else{
+    data.streak = 1;                                  // reset / first ever
+  }
+  data.lastDay = DAY_INDEX;
+  saveStreak(data);
+  return data.streak;
+}
+function refreshStreakChip(){
+  const data = loadStreak();
+  const chip = document.getElementById('streakChip');
+  const txt = document.getElementById('streakText');
+  // Show chip only if a current, valid streak applies to today or yesterday.
+  let show = 0;
+  if(data.lastDay === DAY_INDEX) show = data.streak;
+  else if(data.lastDay === DAY_INDEX - 1) show = data.streak;
+  if(show > 0){
+    txt.textContent = 'Streak: ' + show + (show===1?' Day':' Days');
+    chip.hidden = false;
+  }else{
+    chip.hidden = true;
+  }
+}
+
+/* ---------- Header / progress paint ---------- */
+function paintHeader(){
+  document.getElementById('dayNum').textContent = '#' + DAY_NUMBER;
+}
+function paintStars(){
+  const wrap = document.getElementById('stars');
+  const labelParts = [];
+  [...wrap.children].forEach((sp,i)=>{
+    const level = LEVELS[i];
+    const star = starFor(level);
+    const prev = sp.textContent;
+    if(star){
+      sp.classList.remove('pending');
+      sp.textContent = star;
+      labelParts.push(LEVEL_LABEL[level] + (star==='⭐' ? ' solved without a hint' : ' solved with a hint'));
+      if(prev !== star){
+        sp.classList.remove('pop');
+        void sp.offsetWidth; // restart animation
+        sp.classList.add('pop');
+      }
+    }else{
+      sp.classList.add('pending');
+      sp.textContent = '•';
+    }
+  });
+  wrap.setAttribute('aria-label', labelParts.length ? labelParts.join('; ') : 'No levels completed yet');
+  paintPerfect();
+}
+function paintPerfect(){
+  const el = document.getElementById('perfectStatus');
+  if(isPerfectDay()){
+    el.hidden = false;
+    el.className = 'perfect win';
+    el.textContent = '🏆 Perfect Day';
+  }else if(anyHintUsed()){
+    el.hidden = false;
+    el.className = 'perfect lost';
+    el.textContent = '❌ Perfect Day Lost';
+  }else{
+    el.hidden = true;
+    el.textContent = '';
+  }
+}
+function paintTabs(){
+  LEVELS.forEach(l=>{
+    const tab = document.getElementById('tab-'+l);
+    const stateEl = tab.querySelector('[data-state]');
+    tab.classList.toggle('locked', !state.unlocked[l]);
+    tab.classList.toggle('done', state.done[l]);
+    tab.setAttribute('aria-selected', state.current===l ? 'true':'false');
+    const star = starFor(l);
+    if(star) stateEl.textContent = star;
+    else if(!state.unlocked[l]) stateEl.textContent = '🔒';
+    else stateEl.textContent = '•';
+  });
+}
+
+/* ---------- Render a question card ---------- */
+function renderLevel(level){
+  state.current = level;
+  paintTabs();
+  const q = TODAY_SET[level];
+  const answered = state.answered[level];
+  const stage = document.getElementById('stage');
+
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  card.innerHTML = `
+    <div class="card-top">
+      <span class="category">${escapeHtml(q.category)}</span>
+      <span class="difficulty">${LEVEL_LABEL[level]}</span>
+    </div>
+    <p class="prompt">Which statement is false?<small>Tap the one you think isn't true.</small></p>
+    <div class="statements" id="statements"></div>
+    <div class="hint-wrap" id="hintWrap"></div>
+    <div id="feedbackSlot"></div>
+  `;
+  stage.innerHTML = '';
+  stage.appendChild(card);
+
+  // statements
+  const list = card.querySelector('#statements');
+  q.statements.forEach((text,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'statement';
+    btn.type = 'button';
+    btn.innerHTML = `<span class="marker">${String.fromCharCode(65+i)}</span>${escapeHtml(text)}`;
+    btn.addEventListener('click', ()=>onAnswer(level, i, btn));
+    list.appendChild(btn);
+  });
+
+  // hint
+  const hintWrap = card.querySelector('#hintWrap');
+  if(!answered){
+    const hintBtn = document.createElement('button');
+    hintBtn.className = 'hint-btn';
+    hintBtn.type = 'button';
+    hintBtn.textContent = state.hintUsed[level] ? '💡 Hint used' : '💡 Hint';
+    hintBtn.addEventListener('click', ()=>{
+      state.hintUsed[level] = true; // tracked per difficulty
+      const p = document.createElement('p');
+      p.className = 'hint-text';
+      p.textContent = q.hint;
+      hintBtn.replaceWith(p);
+      paintStars(); // updates Perfect Day status immediately
+      paintTabs();
+    });
+    hintWrap.appendChild(hintBtn);
+    // if hint was already revealed earlier this session, show the text again
+    if(state.hintUsed[level]){
+      const p = document.createElement('p');
+      p.className = 'hint-text';
+      p.textContent = q.hint;
+      hintBtn.replaceWith(p);
+    }
+  }
+
+  // if already answered this session, re-show resolved state
+  if(answered){
+    resolveCard(level, state.answered[level].picked);
+  }
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------- Answer handling ---------- */
+function onAnswer(level, picked, btn){
+  if(state.answered[level]) return; // lock after first answer
+  const q = TODAY_SET[level];
+  const correct = (picked === q.falseIndex);
+  state.answered[level] = {picked, correct};
+
+  // award star + unlock regardless (players never get stuck)
+  if(!state.done[level]){
+    state.done[level] = true;
+    const idx = LEVELS.indexOf(level);
+    if(idx+1 < LEVELS.length) state.unlocked[LEVELS[idx+1]] = true;
+  }
+
+  resolveCard(level, picked);
+  paintStars();
+  paintTabs();
+}
+
+function resolveCard(level, picked){
+  const q = TODAY_SET[level];
+  const correct = (picked === q.falseIndex);
+  const buttons = [...document.querySelectorAll('#statements .statement')];
+
+  buttons.forEach((b,i)=>{
+    b.disabled = true;
+    if(i === q.falseIndex){
+      // the false statement is the correct pick
+      b.classList.add(i===picked ? 'correct' : 'reveal');
+      b.querySelector('.marker').textContent = '✓';
+    }else if(i === picked && !correct){
+      b.classList.add('wrong');
+      b.querySelector('.marker').textContent = '✕';
+    }else{
+      b.classList.add('dim');
+    }
+  });
+
+  // hint area: collapse to nothing if untouched button still present
+  const hintBtn = document.querySelector('#hintWrap .hint-btn');
+  if(hintBtn) hintBtn.remove();
+
+  // feedback block
+  const slot = document.getElementById('feedbackSlot');
+  slot.innerHTML = '';
+  const fb = document.createElement('div');
+  fb.className = 'feedback';
+
+  const verdict = document.createElement('div');
+  verdict.className = 'verdict ' + (correct ? 'ok':'no');
+  verdict.innerHTML = correct ? '✅ Correct!' : '❌ Incorrect';
+  fb.appendChild(verdict);
+
+  const exp = document.createElement('p');
+  exp.className = 'explanation';
+  exp.innerHTML = escapeHtml(q.explanation);
+  fb.appendChild(exp);
+
+  const idx = LEVELS.indexOf(level);
+  const nextBtn = document.createElement('button');
+  nextBtn.className = 'next-btn';
+  nextBtn.type = 'button';
+  if(idx+1 < LEVELS.length){
+    const nextLevel = LEVELS[idx+1];
+    nextBtn.textContent = 'Next: ' + LEVEL_LABEL[nextLevel] + ' →';
+    nextBtn.addEventListener('click', ()=>renderLevel(nextLevel));
+  }else{
+    nextBtn.textContent = 'See Results →';
+    nextBtn.addEventListener('click', showCompletion);
+  }
+  fb.appendChild(nextBtn);
+
+  slot.appendChild(fb);
+}
+
+/* ---------- Completion screen ---------- */
+function showCompletion(){
+  const streakNow = commitStreakForToday();
+  refreshStreakChip();
+
+  const stage = document.getElementById('stage');
+  state.current = null;
+  paintTabs();
+
+  const pattern = LEVELS.map(l=> starFor(l) || '☆').join('');
+  const perfect = isPerfectDay();
+  const perfectBadge = perfect
+    ? '<div class="perfect-badge win">🏆 Perfect Day</div>'
+    : '<div class="perfect-badge lost">❌ Perfect Day Lost</div>';
+
+  const rows = LEVELS.map(l=>{
+    const star = starFor(l) || '☆';
+    return `<div class="check-row"><span>${LEVEL_LABEL[l]}</span><span class="res">${star} <span class="tick">✓</span></span></div>`;
+  }).join('');
+
+  const wrap = document.createElement('div');
+  wrap.className = 'complete';
+  wrap.innerHTML = `
+    <div class="big-stars">${pattern}</div>
+    <h2>Daily Challenge Complete</h2>
+    ${perfectBadge}
+    <div class="check-list">
+      ${rows}
+    </div>
+    <p class="come-back">Come back tomorrow.</p>
+    <button class="copy-btn" id="copyBtn" type="button">📋 Copy Results</button>
+  `;
+  stage.innerHTML = '';
+  stage.appendChild(wrap);
+
+  document.getElementById('copyBtn').addEventListener('click', copyResults);
+  launchConfetti();
+}
+
+function resultText(){
+  const pattern = LEVELS.map(l=> starFor(l) || '☆').join('');
+  let text = 'One False #' + DAY_NUMBER + '\n' +
+             pattern + '\n' +
+             'Easy ✓ Medium ✓ Hard ✓';
+  if(isPerfectDay()) text += '\n🏆 Perfect Day';
+  return text;
+}
+function copyResults(){
+  const text = resultText();
+  const btn = document.getElementById('copyBtn');
+  const done = ()=>{
+    btn.classList.add('copied');
+    btn.textContent = '✓ Copied!';
+    setTimeout(()=>{ btn.classList.remove('copied'); btn.textContent='📋 Copy Results'; }, 1800);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done));
+  }else{
+    fallbackCopy(text, done);
+  }
+}
+function fallbackCopy(text, done){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try{ document.execCommand('copy'); done(); }catch(e){}
+  document.body.removeChild(ta);
+}
+
+/* ---------- Confetti ---------- */
+function launchConfetti(){
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const colors = ['#ffd23f','#2ee6a0','#ff5d73','#6aa8ff','#c98bff'];
+  const N = 90;
+  for(let i=0;i<N;i++){
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random()*100 + 'vw';
+    c.style.background = colors[i%colors.length];
+    c.style.animationDuration = (2.4 + Math.random()*1.8) + 's';
+    c.style.animationDelay = (Math.random()*0.5) + 's';
+    c.style.transform = 'rotate('+(Math.random()*360)+'deg)';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 4800);
+  }
+}
+
+/* ---------- Tab interaction ---------- */
+LEVELS.forEach(l=>{
+  document.getElementById('tab-'+l).addEventListener('click', ()=>{
+    if(!state.unlocked[l]) return;
+    renderLevel(l);
+  });
+});
+
+/* ---------- Boot ---------- */
+function boot(){
+  paintHeader();
+  refreshStreakChip();
+  paintStars();
+  paintTabs();
+  renderLevel('easy');
+}
+boot();
+</script>
+</body>
+</html>
